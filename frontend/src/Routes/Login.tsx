@@ -1,0 +1,72 @@
+import React, {useContext, useState} from 'react';
+import { useNavigate } from 'react-router-dom';
+import {AuthContext} from "../Auth/AuthContext";
+
+export default function LoginPage() {
+    const {setToken} = useContext(AuthContext);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    async function handleSubmit(e: { preventDefault: () => void; }) {
+        e.preventDefault();
+        const res = await fetch('https://api.vasylevskyi.net/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+        });
+        if (!res.ok) setError('Invalid credentials')
+        else {
+            const { token } = await res.json();
+
+            if (!token) {
+                setError("Falsey token received upstream");
+            }
+
+            setToken(token || '');
+            navigate('/dashboard');
+        }
+    }
+
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-full max-w-md">
+                <h2 className="text-2xl font-semibold mb-6">Sign In</h2>
+
+                {error && <div className="mb-4 text-red-600">{error}</div>}
+
+                <div className="mb-4">
+                    <label htmlFor="email" className="block mb-1">Email</label>
+                    <input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="w-full px-3 py-2 border rounded"
+                    />
+                </div>
+
+                <div className="mb-6">
+                    <label htmlFor="password" className="block mb-1">Password</label>
+                    <input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="w-full px-3 py-2 border rounded"
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+                >
+                    Login
+                </button>
+            </form>
+        </div>
+    );
+}
