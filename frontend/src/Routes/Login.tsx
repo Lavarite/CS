@@ -1,5 +1,8 @@
 import React, {useContext, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { GoogleLogin } from "@react-oauth/google";
+
 import {AuthContext} from "../Auth/AuthContext";
 
 export default function LoginPage() {
@@ -27,6 +30,30 @@ export default function LoginPage() {
 
             setToken(token || '');
             navigate('/dashboard');
+        }
+    }
+
+    async function handleGoogle(credentialResponse: any) {
+        try {
+            const response = await fetch("https://api.vasylevskyi.net/google_login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ token: credentialResponse.credential }),
+            });
+
+            if (!response.ok) {
+                throw new Error();
+            }
+
+            const { token } = await response.json();
+
+            setToken(token || '');
+            navigate('/dashboard');
+
+        } catch (err) {
+            setError("Google Login failed");
         }
     }
 
@@ -67,6 +94,7 @@ export default function LoginPage() {
                 >
                     Login
                 </button>
+                <GoogleLogin onSuccess={handleGoogle} onError={() => setError("Google Login Failed")} />
             </form>
         </div>
     );

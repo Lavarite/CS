@@ -2,3 +2,5 @@ fastapi
 uvicorn[standard]
 python-jose[cryptography]
 passlib[bcrypt]
+google-auth[cryptography]
+requests

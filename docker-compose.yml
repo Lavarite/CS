@@ -9,6 +9,7 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - PORT=4000
       - DANGEROUSLY_DISABLE_HOST_CHECK=true
+      - REACT_APP_GOOGLE_CLIENT_ID=735650071390-7fkh0l2835b3qfgmpjg72m6vtig97ki1.apps.googleusercontent.com
     working_dir: /app
     stdin_open: true
     tty: true

@@ -8,6 +8,9 @@ from app.auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 import hashlib
 from datetime import timedelta
 
+from google.oauth2 import id_token
+from google.auth.transport import requests
+
 app = FastAPI()
 
 @app.on_event("startup")
@@ -39,7 +42,33 @@ def login_call(login_info: dict):
         data=user_payload,
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
-    return {"token": token, "token_type": "bearer"}
+    return {"token": token, "type": "bearer"}
+
+@app.post("/google_login")
+async def google_login_call(login_info: dict):
+    try:
+        idinfo = id_token.verify_oauth2_token(login_info["token"], requests.Request())
+        user = get_user_by_email(idinfo["email"])
+        if not user :
+            raise HTTPException(401, "Invalid email")
+
+        user_payload = {
+            "id": user["id"],
+            "name": user["name"],
+            "surname": user["surname"],
+            "email": user["email"],
+            "role": user["role"],
+        }
+
+        token = create_access_token(
+            data=user_payload,
+            expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+        )
+
+        return {"token": token, "type": "bearer"}
+
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid token")
 
 
 @app.get("/users/me")
