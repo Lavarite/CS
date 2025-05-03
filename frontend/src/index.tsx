@@ -13,18 +13,18 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-    <React.StrictMode>
-        <AuthProvider>
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/login" element={<Login />} />
+    <AuthProvider>
+        <BrowserRouter>
+            <Routes>
+                {/*These Routes are public. No need for auth*/}
+                <Route path="/login" element={<Login />} />
 
-                    <Route element={<RequireAuth />}>
-                        <Route path="/" element={<Dashboard />} />
-                        <Route path="/dashboard" element={<Dashboard />} />
-                    </Route>
-                </Routes>
-            </BrowserRouter>
-        </AuthProvider>
-    </React.StrictMode>
+                <Route element={<RequireAuth />}>
+                    {/*These Routes will need the user info, so need the token*/}
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                </Route>
+            </Routes>
+        </BrowserRouter>
+    </AuthProvider>
 );

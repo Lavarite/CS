@@ -3,15 +3,16 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
 
 export function RequireAuth() {
-    const { token } = useContext(AuthContext);
+    const { isLoading, isAuthenticated } = useContext(AuthContext);
     const location = useLocation();
 
-    console.log('RequireAuth > token is:', token);
-    if (!token) {
-        console.log('RequireAuth > redirecting to /login');
+    if (isLoading) {
+        return null;
+    }
+
+    if (!isAuthenticated) {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    console.log('RequireAuth > rendering children');
     return <Outlet />;
 }

@@ -1,16 +1,10 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-from app.core.config import settings
+import sqlite3
+from threading import Lock
 
-engine = create_engine(
-    settings.database_url, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+DB_PATH = "/data/app.db"
+lock = Lock()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+def get_conn():
+    conn = sqlite3.connect(f"file:{DB_PATH}?mode=rwc", uri=True, check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    return conn

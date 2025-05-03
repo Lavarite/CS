@@ -9,6 +9,7 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+    //After the user has inputted the account details, call api to check the credentials
     async function handleSubmit(e: { preventDefault: () => void; }) {
         e.preventDefault();
         const res = await fetch('https://api.vasylevskyi.net/login', {
@@ -16,7 +17,7 @@ export default function LoginPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }),
         });
-        if (!res.ok) setError('Invalid credentials')
+        if (!res.ok) setError("Incorrect email or password")
         else {
             const { token } = await res.json();
 

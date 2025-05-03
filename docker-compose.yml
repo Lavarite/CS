@@ -20,25 +20,10 @@ services:
       - "3000:3000"
     volumes:
       - ./backend:/app
-    depends_on:
-      - db
+      - ./data:/data
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - DB_HOST=db
-      - DB_PORT=5432
+      - JWT_SETCRET=877a819b49d0dde80924127e9f5376634874124f92d03b77171d91d332ae8635
     command: uvicorn app.main:app --host 0.0.0.0 --port 3000 --reload
-
-  db:
-    image: postgres:16
-    restart: always
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
 
 volumes:
   pgdata:
