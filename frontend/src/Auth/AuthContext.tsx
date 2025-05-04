@@ -31,7 +31,7 @@ export const AuthContext = createContext<AuthContextType>(defaultContext);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [token, setTokenVar] = useState<string>(() => localStorage.getItem('token') || '');
-    const [user, setUser] = useState<UserType | null>(null);
+    const [user, setUserVar] = useState<UserType | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     //If called, the token variable is updated. If the new token is falsey, it is removed entirely
@@ -41,11 +41,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         else localStorage.removeItem('token');
     },[setTokenVar]);
 
+    const setUser = useCallback((newUser: UserType|null) => {
+        setUserVar(newUser);
+        if (newUser) localStorage.setItem('user', JSON.stringify(newUser));
+        else localStorage.removeItem('user');
+    },[setUserVar]);
+
     /*If called, the user info is removed, effectively logging them out*/
     const logout = useCallback(() => {
         setToken('');
         setUser(null);
-        localStorage.removeItem('user');
     }, [setToken, setUser]);
 
     //The token or user in the localStorage or otherwise is changed, check the new credentials.
@@ -67,7 +72,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             })
             .then((u) => {
                 setUser(u);
-                localStorage.setItem('user', JSON.stringify(u));
             })
             .catch(() => {
                 logout();
@@ -78,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [token, logout]);
 
     //Fancy, but !!user returns false if user is not set, otherwise, returns true
+    //Passes down the values of user and token as props
     return (
         <AuthContext.Provider
             value={{
