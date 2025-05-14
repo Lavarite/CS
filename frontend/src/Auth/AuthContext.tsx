@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     //The token or user in the localStorage or otherwise is changed, check the new credentials.
     useEffect(() => {
         if (!token) {
-            setUser(null);
+            logout();
             setIsLoading(false);
             return;
         }
@@ -79,8 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .finally(() => {
                 setIsLoading(false);
             });
-    }, [token, logout]);
-
+    }, [token, logout, setUser]);
     //Fancy, but !!user returns false if user is not set, otherwise, returns true
     //Passes down the values of user and token as props
     return (

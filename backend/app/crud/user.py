@@ -1,3 +1,4 @@
+import sqlite3
 from datetime import datetime
 
 from app.database import get_conn, lock
@@ -43,17 +44,44 @@ def get_user_by_email(email: str):
     conn.close()
     return dict(row) if row else None
 
+def get_user_by_g_id(g_id: str):
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT * FROM users WHERE g_id = ?",
+        (g_id,)
+    ).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
 def create_user(data: dict):
     conn = get_conn()
-    with lock:
-        cur = conn.execute(
-            "INSERT INTO users (name, surname, email, hashed_password, role) VALUES (?, ?, ?, ?, ?)",
-            (data.get("name"), data.get("surname"), data.get("email"), data.get("hashed_password"), data.get("role")),
+    try:
+        with lock:
+            cur = conn.execute("""INSERT INTO users (name, surname, email, hashed_password, role, g_id) VALUES (?, ?, ?, ?, ?, ?) RETURNING *;""",
+                (data["name"], data["surname"], data["email"], data.get("hashed_password",""), data["role"], data.get("g_id", ""),),
+            )
+            user = dict(cur.fetchone())
+            conn.commit()
+    except sqlite3.IntegrityError as e:
+        conn.rollback()
+
+        # UNIQUE constraint on email or g_id?
+        if "users.email" in str(e) or "users.g_id" in str(e):
+            raise HTTPException(
+                status_code=409,
+                detail="Account already exists. Please log in or reset your password."
+            )
+
+        # some other integrity problem
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
         )
-        conn.commit()
-        new_id = cur.lastrowid
-    conn.close()
-    return get_user(new_id)
+    finally:
+        conn.close()
+
+    return user
 
 def update_user(user_id: int, payload: dict):
     fields = []

@@ -44,7 +44,8 @@ export default function LoginPage() {
             });
 
             if (!response.ok) {
-                throw new Error();
+                const errorData = await response.json();
+                throw new Error(errorData.detail);
             }
 
             const { token } = await response.json();
@@ -52,8 +53,8 @@ export default function LoginPage() {
             setToken(token || '');
             navigate('/dashboard');
 
-        } catch (err) {
-            setError("Google Login failed");
+        } catch (err: any) {
+            setError(err.message || "Google Login failed");
         }
     }
 
@@ -88,13 +89,13 @@ export default function LoginPage() {
                     />
                 </div>
 
-                <button
-                    type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-                >
-                    Login
-                </button>
-                <GoogleLogin onSuccess={handleGoogle} onError={() => setError("Google Login Failed")} />
+                <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Login</button>
+                
+                <div className="mt-4 text-center text-gray-500">or</div>
+
+                <div className="flex justify-center mt-4">
+                    <GoogleLogin onSuccess={handleGoogle} onError={() => setError("Google Login Failed")}/>
+                </div>
             </form>
         </div>
     );
